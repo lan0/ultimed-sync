@@ -4,11 +4,14 @@
     $folder = "C:\inbox\dropzone\"
     # Hub access token
     $accessToken = ""
+    # initial File Upload
+    $initialUpload = $true
 
 ### Functions
 
     $apiUrl = "https://hub.mobimed.at/api/files"
     $global:filesToUpload = [System.Collections.ArrayList]@()
+
 
     function log {
       param($text)
@@ -97,7 +100,14 @@
       }
     }
 
-### folderName Example "1024_Max_Mustermann"
+    # initial File Upload
+    function addFilesToFileList {
+      param($folder)
+      $allfiles = Get-ChildItem $folder -Recurse | select -ExpandProperty FullName
+      $global:filesToUpload.AddRange($allfiles);
+    }
+
+    # Example: folderName "1024_Max_Mustermann"
     function getPatientIdFromPath {
       param($path)
       $folderName = Split-Path (Split-Path $path -Parent) -Leaf
@@ -121,6 +131,11 @@
     Register-ObjectEvent $watcher "Created" -Action $action
     Register-ObjectEvent $watcher "Changed" -Action $action
     Register-ObjectEvent $watcher "Renamed" -Action $action
+
+    if ($initialUpload) {
+        addFilesToFileList -folder $folder
+    }
+
     while ($true) {
       sleep 5
       uploadNewFiles
