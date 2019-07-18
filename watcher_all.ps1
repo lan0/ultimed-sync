@@ -6,6 +6,8 @@
     $accessToken = ""
     # initial File Upload
     $initialUpload = $true
+    # Succsessfully uploaded Files will be deleted from Folder
+    $deleteUploadedFiles = $false
 
 ### Functions
 
@@ -89,6 +91,10 @@
         log -text "Uploaded $fileName ($($response.file.id)) to patient $($response.file.patient)"
       } else{
         log -text "Uploaded $fileName ($($response.file.id))"
+      }
+      if($deleteUploadedFiles) {
+          Remove-Item –path $path
+          log -text "Deleted $fileName from $path"
       }
       Add-content "./imported.dat" -value $hash
     }
