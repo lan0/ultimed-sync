@@ -47,8 +47,7 @@
       }
 
       $fileName = Split-Path $path -leaf
-      $folderName = Split-Path (Split-Path $path -Parent) -Leaf
-      $patientId = $folderName -as [int]
+      $patientId = getPatientIdFromPath -path $path
 
       $hash = Get-FileHash $path
       $hash = $hash.hash
@@ -96,6 +95,14 @@
       foreach ($path in $filesToUpload) {
         uploadFile -path $path
       }
+    }
+
+### folderName Example "1024_Max_Mustermann"
+    function getPatientIdFromPath {
+      param($path)
+      $folderName = Split-Path (Split-Path $path -Parent) -Leaf
+      $patientId = $folderName.Split("_")[0] -as [int]
+      return $patientId
     }
 
 ### SET FOLDER TO WATCH + FILES TO WATCH + SUBFOLDERS YES/NO
