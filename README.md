@@ -1,11 +1,18 @@
 # ultimed-sync
 This script watches a folder and uploads any changed files to mobi.MED every 5 seconds.
 
-Adds parameter ```?patient=<foldername>``` to the upload request.
+Adds parameter ```?patient=<patientId>``` to the upload request, where ```patientId``` is prefix of the foldername (patientId_xxx_xxxxx)
 
 imported.dat: List of imported files (hashes)
 
 log.txt: Log of uploaded files
+
+## Configuration Options:
+
+* ```$folder``` the folder which is watched
+* ```$accessToken``` the Token witch is used
+* ```$initialUpload``` if true, then existing files in the specific folder will be uploaded initially
+* ```$deleteUploadedFiles``` if true, successfully uploaded files will be deleted from specific folder
 
 ## Windows autorun:
 
