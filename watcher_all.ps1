@@ -31,6 +31,14 @@
       return $false
     }
 
+    function deleteLocalFile {
+      param($path)
+      if($deleteUploadedFiles) {
+          Remove-Item –path $path
+          log -text "Deleted $fileName from $path"
+      }
+    }
+
     function uploadFile {
       param($path)
 
@@ -58,6 +66,7 @@
       $hash = $hash.hash
       if (isFileAlreadyUploaded -hash $hash) {
         log -text "File already uploaded ($($fileName))"
+        deleteLocalFile -path $path
         return
       }
 
@@ -92,10 +101,7 @@
       } else{
         log -text "Uploaded $fileName ($($response.file.id))"
       }
-      if($deleteUploadedFiles) {
-          Remove-Item –path $path
-          log -text "Deleted $fileName from $path"
-      }
+      deleteLocalFile -path $path
       Add-content "./imported.dat" -value $hash
     }
 
