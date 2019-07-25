@@ -1,15 +1,4 @@
-﻿### Configuration
-
-    # Folder to watch
-    $folder = "C:\inbox\dropzone\"
-    # Hub access token
-    $accessToken = ""
-    # initial File Upload
-    $initialUpload = $true
-    # Successfully uploaded Files will be deleted from Folder
-    $deleteUploadedFiles = $false
-
-### Functions
+﻿### Functions
 
     $apiUrl = "https://hub.mobimed.at/api/files"
     $global:filesToUpload = [System.Collections.ArrayList]@()
@@ -118,14 +107,6 @@
       $global:filesToUpload.AddRange($allFiles);
     }
 
-    # Extracts 1024 from `/foo/bar/1024_Max_Mustermann/file.jpg`
-    function getPatientIdFromPath {
-      param($path)
-      $folderName = Split-Path (Split-Path $path -Parent) -Leaf
-      $patientId = $folderName.Split("_")[0] -as [int]
-      return $patientId
-    }
-
 ### SET FOLDER TO WATCH + FILES TO WATCH + SUBFOLDERS YES/NO
     $watcher = New-Object System.IO.FileSystemWatcher
     $watcher.Path = $folder
@@ -142,6 +123,8 @@
     Register-ObjectEvent $watcher "Created" -Action $action
     Register-ObjectEvent $watcher "Changed" -Action $action
     Register-ObjectEvent $watcher "Renamed" -Action $action
+
+    PS $PSScriptRoot > . .\config.ps1
 
     if ($initialUpload) {
         addFilesToFileList -folder $folder
