@@ -4,17 +4,23 @@
     $folder = "C:\inbox\dropzone\"
     # Hub access token
     $accessToken = ""
-    # initial File Upload
+    # initial file upload
     $initialUpload = $true
-    # Successfully uploaded Files will be deleted from Folder
+    # successfully uploaded files will be deleted from folder
     $deleteUploadedFiles = $false
 
-### Function to get PatientId - Parameter: Path
+### Functions
 
-    #Extracts 1024 from `/foo/bar/1024_Max_Mustermann/file.jpg`
+    #Extracts 1024 from `/foo/bar/1024_Max_Mustermann/file.jpg` (input parameter: file path)
     function getPatientIdFromPath {
       param($path)
       $folderName = Split-Path (Split-Path $path -Parent) -Leaf
       $patientId = $folderName.Split("_")[0] -as [int]
       return $patientId
+    }
+
+    #Upload filter - default all files are valid
+    function shouldUploadFile {
+      param($path)
+      return $true
     }

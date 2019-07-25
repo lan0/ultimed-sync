@@ -1,4 +1,8 @@
-﻿### Functions
+﻿### Loading Configuration
+
+    . .\config.ps1
+
+### Functions
 
     $apiUrl = "https://hub.mobimed.at/api/files"
     $global:filesToUpload = [System.Collections.ArrayList]@()
@@ -21,7 +25,7 @@
 
     function deleteLocalFile {
       param($path)
-      if(!$deleteUploadedFiles) {
+      if(! $deleteUploadedFiles) {
         return
       }
       Remove-Item –path $path
@@ -34,7 +38,7 @@
       while ($global:filesToUpload.Contains($path)) {
         $global:filesToUpload.Remove($path)
       }
-      if (!(Test-Path ".\imported.dat")) {
+      if (! (Test-Path ".\imported.dat")) {
         New-Item -path .\ -name imported.dat -type "file"
       }
       if (! (Test-Path -Path $path)) {
@@ -52,6 +56,11 @@
 
       $hash = Get-FileHash $path
       $hash = $hash.hash
+
+	  if (! (shouldUploadFile -path $path)) {
+        return
+      }
+
       if (isFileAlreadyUploaded -hash $hash) {
         log -text "File already uploaded ($($fileName))"
         deleteLocalFile -path $path
@@ -123,8 +132,6 @@
     Register-ObjectEvent $watcher "Created" -Action $action
     Register-ObjectEvent $watcher "Changed" -Action $action
     Register-ObjectEvent $watcher "Renamed" -Action $action
-
-    PS $PSScriptRoot > . .\config.ps1
 
     if ($initialUpload) {
         addFilesToFileList -folder $folder
