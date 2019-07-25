@@ -9,10 +9,10 @@ log.txt: Log of uploaded files
 
 ## Configuration Options:
 
-* ```$folder``` the folder which is watched
-* ```$accessToken``` the Token witch is used
-* ```$initialUpload``` if true, then existing files in the specific folder will be uploaded initially
-* ```$deleteUploadedFiles``` if true, successfully uploaded files will be deleted from specific folder
+* ```$folder``` the folder to watch
+* ```$accessToken``` the token to use - contact [support@mobimed.at](mailto:support@mobimed.at)
+* ```$initialUpload``` (default: true) existing files in the watched folder will also be uploaded initially and not only after changes occurred
+* ```$deleteUploadedFiles``` (default: false) successfully uploaded files will be deleted from specific folder
 
 ## Windows autorun:
 

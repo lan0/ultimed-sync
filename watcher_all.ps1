@@ -6,14 +6,13 @@
     $accessToken = ""
     # initial File Upload
     $initialUpload = $true
-    # Succsessfully uploaded Files will be deleted from Folder
+    # Successfully uploaded Files will be deleted from Folder
     $deleteUploadedFiles = $false
 
 ### Functions
 
     $apiUrl = "https://hub.mobimed.at/api/files"
     $global:filesToUpload = [System.Collections.ArrayList]@()
-
 
     function log {
       param($text)
@@ -33,10 +32,11 @@
 
     function deleteLocalFile {
       param($path)
-      if($deleteUploadedFiles) {
-          Remove-Item –path $path
-          log -text "Deleted $fileName from $path"
+      if(!$deleteUploadedFiles) {
+        return
       }
+      Remove-Item –path $path
+      log -text "Deleted $fileName from $path"
     }
 
     function uploadFile {
@@ -45,7 +45,6 @@
       while ($global:filesToUpload.Contains($path)) {
         $global:filesToUpload.Remove($path)
       }
-
       if (!(Test-Path ".\imported.dat")) {
         New-Item -path .\ -name imported.dat -type "file"
       }
@@ -115,11 +114,11 @@
     # initial File Upload
     function addFilesToFileList {
       param($folder)
-      $allfiles = Get-ChildItem $folder -Recurse | select -ExpandProperty FullName
-      $global:filesToUpload.AddRange($allfiles);
+      $allFiles = Get-ChildItem $folder -Recurse | select -ExpandProperty FullName
+      $global:filesToUpload.AddRange($allFiles);
     }
 
-    # Example: folderName "1024_Max_Mustermann"
+    # Extracts 1024 from `/foo/bar/1024_Max_Mustermann/file.jpg`
     function getPatientIdFromPath {
       param($path)
       $folderName = Split-Path (Split-Path $path -Parent) -Leaf
