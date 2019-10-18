@@ -7,12 +7,14 @@ imported.dat: List of imported files (hashes)
 
 log.txt: Log of uploaded files
 
-## Configuration Options:
+## Configuration Options (config.ps1):
 
 * ```$folder``` the folder to watch
 * ```$accessToken``` the token to use - contact [support@mobimed.at](mailto:support@mobimed.at)
 * ```$initialUpload``` (default: true) existing files in the watched folder will also be uploaded initially and not only after changes occurred
 * ```$deleteUploadedFiles``` (default: false) successfully uploaded files will be deleted from specific folder
+* ```function getPatientIdFromPath``` the function to determine the patientId, Input: [Path] -Path of the File, Output: [patientId] -internal ID of the patient
+* ```function shouldUploadFile``` (defalut: all Files are uploaded) the function can be replaced to filter based on the file extensions
 
 ## Windows autorun:
 

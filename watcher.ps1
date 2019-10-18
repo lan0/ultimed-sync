@@ -1,13 +1,6 @@
-﻿### Configuration
+﻿### Loading Configuration
 
-    # Folder to watch
-    $folder = "C:\inbox\dropzone\"
-    # Hub access token
-    $accessToken = ""
-    # initial File Upload
-    $initialUpload = $true
-    # Successfully uploaded Files will be deleted from Folder
-    $deleteUploadedFiles = $false
+    . .\config.ps1
 
 ### Functions
 
@@ -32,7 +25,7 @@
 
     function deleteLocalFile {
       param($path)
-      if(!$deleteUploadedFiles) {
+      if(! $deleteUploadedFiles) {
         return
       }
       Remove-Item –path $path
@@ -45,7 +38,7 @@
       while ($global:filesToUpload.Contains($path)) {
         $global:filesToUpload.Remove($path)
       }
-      if (!(Test-Path ".\imported.dat")) {
+      if (! (Test-Path ".\imported.dat")) {
         New-Item -path .\ -name imported.dat -type "file"
       }
       if (! (Test-Path -Path $path)) {
@@ -63,6 +56,11 @@
 
       $hash = Get-FileHash $path
       $hash = $hash.hash
+
+	  if (! (shouldUploadFile -path $path)) {
+        return
+      }
+
       if (isFileAlreadyUploaded -hash $hash) {
         log -text "File already uploaded ($($fileName))"
         deleteLocalFile -path $path
@@ -116,14 +114,6 @@
       param($folder)
       $allFiles = Get-ChildItem $folder -Recurse | select -ExpandProperty FullName
       $global:filesToUpload.AddRange($allFiles);
-    }
-
-    # Extracts 1024 from `/foo/bar/1024_Max_Mustermann/file.jpg`
-    function getPatientIdFromPath {
-      param($path)
-      $folderName = Split-Path (Split-Path $path -Parent) -Leaf
-      $patientId = $folderName.Split("_")[0] -as [int]
-      return $patientId
     }
 
 ### SET FOLDER TO WATCH + FILES TO WATCH + SUBFOLDERS YES/NO
