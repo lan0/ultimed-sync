@@ -22,5 +22,9 @@
     #Upload filter - default all files are valid
     function shouldUploadFile {
       param($path)
+      $fileName = Split-Path $path -Leaf
+      if ($fileName -ne ".DS_Store") {
+        return $false
+      }
       return $true
     }
