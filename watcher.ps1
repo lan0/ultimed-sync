@@ -9,7 +9,7 @@
 
     function log {
       param($text)
-      $logline = "$(Get-Date), $($text)"
+      $logline = "$((Get-Date).toString('u')), $($text)"
       Add-content "./log.txt" -value $logline
     }
 
