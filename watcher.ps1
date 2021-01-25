@@ -25,11 +25,21 @@
 
     function deleteLocalFile {
       param($path)
+      $directory = Split-Path($path)
       if(! $deleteUploadedFiles) {
         return
       }
       Remove-Item –path $path
       log -text "Deleted $fileName from $path"
+
+      if (Test-Path -path "$directory/*") {
+        return; # folder still contains files, abort and do not delete
+      }
+      if ($directory.TrimEnd(@("/","\")) -eq $folder.TrimEnd(@("/","\"))) {
+        return; # do not delete parent folder
+      }
+      log -text "Deleted empty directory $directory"
+      Remove-Item -path $directory
     }
 
     function uploadFile {
@@ -57,7 +67,7 @@
       $hash = Get-FileHash $path
       $hash = $hash.hash
 
-	  if (! (shouldUploadFile -path $path)) {
+      if (! (shouldUploadFile -path $path)) {
         return
       }
 
