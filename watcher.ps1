@@ -113,6 +113,12 @@
     function addFilesToFileList {
       param($folder)
       $allFiles = Get-ChildItem $folder -Recurse | select -ExpandProperty FullName
+      if (-not $allFiles) {
+        return;
+      }
+      if ($allFiles -isnot [array]) {
+        $allFiles = @($allFiles)
+      }
       $global:filesToUpload.AddRange($allFiles);
     }
 
