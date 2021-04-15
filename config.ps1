@@ -7,7 +7,7 @@
     # initial file upload
     $initialUpload = $true
     # successfully uploaded files will be deleted from folder
-    $deleteUploadedFiles = $false
+    $deleteUploadedFiles = $true
 
 ### Functions
 
@@ -23,7 +23,7 @@
     function shouldUploadFile {
       param($path)
       $fileName = Split-Path $path -Leaf
-      if ($fileName -eq ".DS_Store") {
+      if ($fileName.Substring(0, 7) -ne "inf2edv") {
         return $false
       }
       return $true

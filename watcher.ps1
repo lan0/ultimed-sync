@@ -4,7 +4,7 @@
 
 ### Functions
 
-    $apiUrl = "https://hub.mobimed.at/api/files"
+    $apiUrl = "https://<client>.mobimed.at/api/v1/files/infoskop"
     $global:filesToUpload = [System.Collections.ArrayList]@()
 
     function log {
@@ -29,8 +29,13 @@
       if(! $deleteUploadedFiles) {
         return
       }
+
+      $filePath = getFilePathFromGdt -gdtPath $path
+      Remove-Item –path $filePath
+      log -text "Deleted $filePath"
+
       Remove-Item –path $path
-      log -text "Deleted $fileName from $path"
+      log -text "Deleted $path"
 
       if (Test-Path -path "$directory/*") {
         return; # folder still contains files, abort and do not delete
@@ -42,8 +47,34 @@
       Remove-Item -path $directory
     }
 
+    function getFilePathFromGdt {
+      param($gdtPath)
+
+      $content = [System.IO.File]::ReadAllBytes($gdtPath)
+      $content = [System.Text.Encoding]::GetEncoding('ISO-8859-1').GetString($content);
+
+      $lines = $content.Split("`n");
+
+      $filePath = $false;
+      foreach ($line in $lines) {
+        if ($line.length -lt 7) {
+          continue;
+        }
+        if ($line.Substring(3, 4) -eq "6305") {
+          $filePath = $line.Substring(7);
+          return $filePath.Trim()
+        }
+      }
+
+      return $filePath;
+    }
+
     function uploadFile {
       param($path)
+
+      if (! (shouldUploadFile -path $path)) {
+        return
+      }
 
       while ($global:filesToUpload.Contains($path)) {
         $global:filesToUpload.Remove($path)
@@ -61,34 +92,45 @@
         return
       }
 
-      $fileName = Split-Path $path -leaf
-      $patientId = getPatientIdFromPath -path $path
+      $gdtPath = $path;
+      $filePath = getFilePathFromGdt -gdtPath $gdtPath
 
-      $hash = Get-FileHash $path
-      $hash = $hash.hash
-
-      if (! (shouldUploadFile -path $path)) {
+      if (! $filePath) {
+        log -text "Could not find path to file in $($gdtPath)"
         return
       }
 
+      $fileName = Split-Path $filePath -leaf
+
+      $patientId = $false
+
+      $hash = Get-FileHash $gdtPath
+      $hash = $hash.hash
+
       if (isFileAlreadyUploaded -hash $hash) {
-        log -text "File already uploaded ($($fileName))"
-        deleteLocalFile -path $path
+        log -text "File already uploaded ($($gdtPath))"
+        deleteLocalFile -path $gdtPath
         return
       }
 
       # API expects multipart/form-data request
       # see https://stackoverflow.com/a/48580319
-      $fileBin = [System.IO.File]::ReadAllBytes($path)
+      $fileBin = [System.IO.File]::ReadAllBytes($filePath)
       $fileBin = [System.Text.Encoding]::GetEncoding('ISO-8859-1').GetString($fileBin);
+      $gdtBin = [System.IO.File]::ReadAllBytes($gdtPath)
+      $gdtBin = [System.Text.Encoding]::GetEncoding('ISO-8859-1').GetString($gdtBin);
       $boundary = [System.Guid]::NewGuid().ToString()
       $LF = "`r`n"
       $bodyLines = (
         "--$boundary",
-        "Content-Disposition: form-data; name=`"file`"; filename=`"$fileName`"",
+        "Content-Disposition: form-data; name=`"files[]`"; filename=`"$fileName`"",
         "Content-Type: application/octet-stream$LF",
         $fileBin,
-        "--$boundary--$LF"
+        "--$boundary",
+        "Content-Disposition: form-data; name=`"files[]`"; filename=`"meta.gdt`"",
+        "Content-Type: application/octet-stream$LF",
+        $gdtBin,
+        "--$boundary--"
       ) -join $LF
 
       if($patientId) {
@@ -108,7 +150,7 @@
       } else{
         log -text "Uploaded $fileName ($($response.file.id))"
       }
-      deleteLocalFile -path $path
+      deleteLocalFile -path $gdtPath
       Add-content "./imported.dat" -value $hash
     }
 
