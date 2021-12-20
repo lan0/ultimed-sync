@@ -15,10 +15,7 @@
 
     #Extracts 1024 from `/foo/bar/1024_Max_Mustermann/file.jpg` (input parameter: file path)
     function getPatientIdFromPath {
-      param($path)
-      $folderName = Split-Path (Split-Path $path -Parent) -Leaf
-      $patientId = $folderName.Split("_")[0] -as [int]
-      return $patientId
+      return $false
     }
 
     #Upload filter - default all files are valid
