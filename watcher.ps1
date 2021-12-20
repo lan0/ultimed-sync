@@ -1,10 +1,11 @@
-﻿### Loading Configuration
+﻿#/usr/bin/pwsh
+
+### Loading Configuration
 
     . .\config.ps1
 
 ### Functions
 
-    $apiUrl = "https://hub.mobimed.at/api/files"
     $global:filesToUpload = [System.Collections.ArrayList]@()
 
     function log {

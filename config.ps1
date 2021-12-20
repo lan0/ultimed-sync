@@ -8,6 +8,8 @@
     $initialUpload = $true
     # successfully uploaded files will be deleted from folder
     $deleteUploadedFiles = $false
+    # URL to API endpoint
+    $apiUrl = "http://ultimed-api.test/v1/files/lab"
 
 ### Functions
 
