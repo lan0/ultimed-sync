@@ -22,9 +22,5 @@
     #Upload filter - default all files are valid
     function shouldUploadFile {
       param($path)
-      $fileName = Split-Path $path -Leaf
-      if ($fileName.Substring(0, 7) -ne "inf2edv") {
-        return $false
-      }
-      return $true
+      return $path -Like '*.gdt';
     }

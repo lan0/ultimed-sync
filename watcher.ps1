@@ -4,7 +4,7 @@
 
 ### Functions
 
-    $apiUrl = "https://<client>.mobimed.at/api/v1/files/infoskop"
+    $apiUrl = "https://<client>.mobimed.at/api/v1/files/ambulapps"
     $global:filesToUpload = [System.Collections.ArrayList]@()
 
     function log {
