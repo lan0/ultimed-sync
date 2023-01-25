@@ -6,7 +6,7 @@
     $accessToken = ""
     # initial file upload
     $initialUpload = $true
-    # successfully uploaded files will be deleted from folder
+    # successfully uploaded files will be moved to Upload folder
     $deleteUploadedFiles = $false
     # URL to API endpoint
     $apiUrl = "https://api-staging.mobimed.at/v1/files/ldt"

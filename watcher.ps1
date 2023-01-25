@@ -30,17 +30,10 @@
       if(! $deleteUploadedFiles) {
         return
       }
-      Remove-Item –path $path
-      log -text "Deleted $fileName from $path"
-
-      if (Test-Path -path "$directory/*") {
-        return; # folder still contains files, abort and do not delete
-      }
-      if ($directory.TrimEnd(@("/","\")) -eq $folder.TrimEnd(@("/","\"))) {
-        return; # do not delete parent folder
-      }
-      log -text "Deleted empty directory $directory"
-      Remove-Item -path $directory
+      $fileName = Split-Path $path -leaf
+      $destination = "$directory\Uploaded\$fileName"
+      Move-Item –path $path -destination $destination
+      log -text "Moved $fileName from $path to $destination"
     }
 
     function uploadFile {
