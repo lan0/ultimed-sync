@@ -9,24 +9,22 @@
     # successfully uploaded files will be deleted from folder
     $deleteUploadedFiles = $false
     # URL to API endpoint
-    $apiUrl = "http://ultimed-api.test/v1/files/lab"
+    $apiUrl = "https://api-staging.mobimed.at/v1/files/ldt"
 
 ### Functions
 
     #Extracts 1024 from `/foo/bar/1024_Max_Mustermann/file.jpg` (input parameter: file path)
     function getPatientIdFromPath {
       param($path)
-      $folderName = Split-Path (Split-Path $path -Parent) -Leaf
-      $patientId = $folderName.Split("_")[0] -as [int]
-      return $patientId
+      return $false
     }
 
     #Upload filter - default all files are valid
     function shouldUploadFile {
       param($path)
-      $fileName = Split-Path $path -Leaf
-      if ($fileName -eq ".DS_Store") {
-        return $false
+      $extension = [System.IO.Path]::GetExtension($path)
+      if ($extension -eq ".LDT") {
+        return $true
       }
       return $true
     }
