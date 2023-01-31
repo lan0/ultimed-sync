@@ -92,14 +92,18 @@
       # for Powershell 6 add -SkipHeaderValidation
       $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $bodyLines  -ContentType "multipart/form-data; boundary=`"$boundary`"" -Headers @{Authorization=("Bearer {0}" -f $accessToken)}
 
-      if (-Not $response.file.id) {
+      if (-Not $response.file.id -And -Not $response.files) {
         log -text "Upload of $fileName to $apiUrl failed"
         return
       }
       # Upload to patient was successful
-      if($response.file.patient) {
+      if ($response.files) {
+        foreach ($file in $response.files) {
+          log -text "Uploaded $fileName ($($file.id)) to patient $($file.patient)"
+        }
+      } elseif ($response.file.patient) {
         log -text "Uploaded $fileName ($($response.file.id)) to patient $($response.file.patient)"
-      } else{
+      } else {
         log -text "Uploaded $fileName ($($response.file.id))"
       }
       deleteLocalFile -path $path
