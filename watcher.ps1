@@ -4,7 +4,7 @@
 
 ### Functions
 
-    $apiUrl = "https://<client>.mobimed.at/api/v1/files/infoskop"
+    $apiUrl = "https://<client>.mobimed.at/api/v1/files/labgate"
     $global:filesToUpload = [System.Collections.ArrayList]@()
 
     function log {
@@ -30,10 +30,6 @@
         return
       }
 
-      $filePath = getFilePathFromGdt -gdtPath $path
-      Remove-Item –path $filePath
-      log -text "Deleted $filePath"
-
       Remove-Item –path $path
       log -text "Deleted $path"
 
@@ -45,28 +41,6 @@
       }
       log -text "Deleted empty directory $directory"
       Remove-Item -path $directory
-    }
-
-    function getFilePathFromGdt {
-      param($gdtPath)
-
-      $content = [System.IO.File]::ReadAllBytes($gdtPath)
-      $content = [System.Text.Encoding]::GetEncoding('ISO-8859-1').GetString($content);
-
-      $lines = $content.Split("`n");
-
-      $filePath = $false;
-      foreach ($line in $lines) {
-        if ($line.length -lt 7) {
-          continue;
-        }
-        if ($line.Substring(3, 4) -eq "6305") {
-          $filePath = $line.Substring(7);
-          return $filePath.Trim()
-        }
-      }
-
-      return $filePath;
     }
 
     function uploadFile {
@@ -93,14 +67,6 @@
       }
 
       $gdtPath = $path;
-      $filePath = getFilePathFromGdt -gdtPath $gdtPath
-
-      if (! $filePath) {
-        log -text "Could not find path to file in $($gdtPath)"
-        return
-      }
-
-      $fileName = Split-Path $filePath -leaf
 
       $patientId = $false
 
@@ -115,17 +81,11 @@
 
       # API expects multipart/form-data request
       # see https://stackoverflow.com/a/48580319
-      $fileBin = [System.IO.File]::ReadAllBytes($filePath)
-      $fileBin = [System.Text.Encoding]::GetEncoding('ISO-8859-1').GetString($fileBin);
       $gdtBin = [System.IO.File]::ReadAllBytes($gdtPath)
       $gdtBin = [System.Text.Encoding]::GetEncoding('ISO-8859-1').GetString($gdtBin);
       $boundary = [System.Guid]::NewGuid().ToString()
       $LF = "`r`n"
       $bodyLines = (
-        "--$boundary",
-        "Content-Disposition: form-data; name=`"files[]`"; filename=`"$fileName`"",
-        "Content-Type: application/octet-stream$LF",
-        $fileBin,
         "--$boundary",
         "Content-Disposition: form-data; name=`"files[]`"; filename=`"meta.gdt`"",
         "Content-Type: application/octet-stream$LF",
@@ -140,16 +100,8 @@
       # for Powershell 6 add -SkipHeaderValidation
       $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $bodyLines  -ContentType "multipart/form-data; boundary=`"$boundary`"" -Headers @{Authorization=("Bearer {0}" -f $accessToken)}
 
-      if (-Not $response.file.id) {
-        log -text "Upload of $fileName to $apiUrl failed"
-        return
-      }
-      # Upload to patient was successful
-      if($response.file.patient) {
-        log -text "Uploaded $fileName ($($response.file.id)) to patient $($response.file.patient)"
-      } else{
-        log -text "Uploaded $fileName ($($response.file.id))"
-      }
+      log -text "Uploaded gdt file"
+      
       deleteLocalFile -path $gdtPath
       Add-content "./imported.dat" -value $hash
     }

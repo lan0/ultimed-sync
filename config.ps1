@@ -23,7 +23,7 @@
     function shouldUploadFile {
       param($path)
       $fileName = Split-Path $path -Leaf
-      if ($fileName.Substring(0, 7) -ne "inf2edv") {
+      if (! $fileName.EndsWith(".gdt")) {
         return $false
       }
       return $true
